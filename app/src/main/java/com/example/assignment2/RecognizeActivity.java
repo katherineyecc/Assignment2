@@ -3,27 +3,19 @@ package com.example.assignment2;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.PendingIntent;
-import android.app.Service;
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.ServiceConnection;
-import android.graphics.drawable.Drawable;
+import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.drive.Drive;
 import com.google.android.gms.location.ActivityRecognition;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import static com.google.android.gms.drive.Drive.*;
 
 public class RecognizeActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks,
@@ -35,6 +27,8 @@ public class RecognizeActivity extends AppCompatActivity implements
     public static ImageView aImage;
     public static String previousActivity;
     public static long detectCount = 0;
+    private static boolean isPlay = false;
+    private MediaPlayer mp = MediaPlayer.create(this, R.raw.bgm);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +54,21 @@ public class RecognizeActivity extends AppCompatActivity implements
 
     public void handleDetectType(String detectType){
         if(detectType != previousActivity){
+            if(detectType.equals("Running")){
+                // play music from the device musing list
+                mp.start();
+                isPlay = true;
+            } else if(detectType.equals("Walking") || detectType.equals("In Vehicle")){
+                // display a map of current location, and show continuous movement
+                if(isPlay == true){
+                    mp.stop();
+                    isPlay = false;
+                }
+            }
+            if(isPlay == true){
+                mp.stop();
+                isPlay = false;
+            }
             aType.setText("Current Activity: "+detectType);
             setActivityImage(detectType);
             SimpleDatabase db = new SimpleDatabase(this);
